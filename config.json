@@ -1,0 +1,5 @@
+{
+  "project_name": "QAgent",
+  "test_command": "npx playwright test",
+  "report_path": "./reports"
+}
