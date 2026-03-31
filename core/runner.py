@@ -1,19 +1,27 @@
 import subprocess
-from utils.logger import log
+
 
 def run_tests():
-    log("Running Playwright tests...")
+    """
+    Executes Playwright tests using subprocess.
+    """
 
-    result = subprocess.run(
-        ["npx", "playwright", "test"],
-        capture_output=True,
-        text=True
-    )
+    try:
+        process = subprocess.run(
+            ["C:\\Program Files\\nodejs\\npx.cmd", "playwright", "test"],
+            capture_output=True,
+            text=True
+        )
 
-    log("Tests finished")
+        return {
+            "returncode": process.returncode,
+            "stdout": process.stdout,
+            "stderr": process.stderr
+        }
 
-    return {
-        "stdout": result.stdout,
-        "stderr": result.stderr,
-        "returncode": result.returncode
-    }
+    except Exception as e:
+        return {
+            "returncode": -1,
+            "stdout": "",
+            "stderr": str(e)
+        }

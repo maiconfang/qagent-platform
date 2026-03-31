@@ -1,14 +1,69 @@
-from utils.logger import log
+import re
 
-def analyze_results(test_results):
-    log("Analyzing test results...")
 
-    if test_results["returncode"] == 0:
-        status = "SUCCESS"
-    else:
-        status = "FAILURE"
+def analyze_results(result):
+    """
+    Enhanced analyzer with basic failure classification.
+    """
 
-    return {
-        "status": status,
-        "details": test_results["stdout"][:500]
+    return_code = result["returncode"]
+    stdout = result.get("stdout", "")
+    stderr = result.get("stderr", "")
+
+    analysis = {
+        "status": "SUCCESS" if return_code == 0 else "FAILURE",
+        "failure_type": None,
+        "failed_tests": 0,
+        "error_summary": None
     }
+
+    if return_code != 0:
+        failure_type = detect_failure_type(stdout, stderr)
+        failed_tests = extract_failed_tests(stdout)
+        error_summary = extract_error_summary(stderr or stdout)
+
+        analysis.update({
+            "failure_type": failure_type,
+            "failed_tests": failed_tests,
+            "error_summary": error_summary
+        })
+
+    return analysis
+
+
+def detect_failure_type(stdout, stderr):
+    combined = (stdout + stderr).lower()
+
+    if "timeout" in combined:
+        return "TIMEOUT"
+
+    if "locator" in combined or "element not found" in combined:
+        return "ELEMENT_NOT_FOUND"
+
+    if "expect" in combined:
+        return "ASSERTION_FAILURE"
+
+    if "net::err" in combined or "failed to fetch" in combined:
+        return "NETWORK_ERROR"
+    
+    if "winerror 2" in combined or "cannot find the file" in combined:
+        return "ENVIRONMENT_ERROR"
+
+    return "UNKNOWN"
+
+
+def extract_failed_tests(stdout):
+    match = re.search(r"(\d+)\s+failed", stdout.lower())
+    if match:
+        return int(match.group(1))
+    return 0
+
+
+def extract_error_summary(output):
+    lines = output.splitlines()
+
+    for line in lines:
+        if "error" in line.lower() or "timeout" in line.lower():
+            return line.strip()
+
+    return lines[-1] if lines else "No error summary available"
