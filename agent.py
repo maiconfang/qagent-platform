@@ -48,6 +48,7 @@ def main():
 
     max_attempts = int(os.getenv("MAX_ATTEMPTS", 2))
     attempt = 0
+    failure_history = {}
 
     agent_timer = Timer()
     agent_timer.start()
@@ -76,6 +77,9 @@ def main():
         log("Analyzing results...", f"{current_phase} | ANALYSIS")
         analysis = analyze_results(result)
 
+        if analysis["status"] != "SUCCESS":
+            failure_history[current_phase] = failure_history.get(current_phase, 0) + 1
+
         phase_timer.stop()
         duration = phase_timer.duration()
 
@@ -94,14 +98,19 @@ def main():
         log(f"duration={duration}s tests={tests_count} passed={passed} failed={failed}", f"{current_phase} | METRICS")
 
         decision = decide_next_step(analysis)
-        log(f"Decision: {decision}", "DECISION")
+        log(f"Decision: {decision} (status={analysis['status']})", "DECISION")
 
         final_result = result
         final_analysis = analysis
         final_phase = current_phase
         final_decision = decision
 
+        if failure_history.get(current_phase, 0) >= 2:
+            log(f"Repeated failure in {current_phase}, stopping retries", "INTELLIGENCE")
+            break
+
         if decision == "STOP":
+            log("Skipping remaining phases due to failure", "FLOW")
             break
 
         # =========================
@@ -118,6 +127,9 @@ def main():
         log("Analyzing results...", f"{current_phase} | ANALYSIS")
         analysis = analyze_results(result)
 
+        if analysis["status"] != "SUCCESS":
+            failure_history[current_phase] = failure_history.get(current_phase, 0) + 1
+
         phase_timer.stop()
         duration = phase_timer.duration()
 
@@ -136,17 +148,23 @@ def main():
         log(f"duration={duration}s tests={tests_count} passed={passed} failed={failed}", f"{current_phase} | METRICS")
 
         decision = decide_next_step(analysis)
-        log(f"Decision: {decision}", "DECISION")
+        log(f"Decision: {decision} (status={analysis['status']})", "DECISION")
 
         final_result = result
         final_analysis = analysis
         final_phase = current_phase
         final_decision = decision
 
+        if failure_history.get(current_phase, 0) >= 2:
+            log(f"Repeated failure in {current_phase}, stopping retries", "INTELLIGENCE")
+            break
+
         if decision == "STOP":
+            log("Skipping remaining phases due to failure", "FLOW")
             break
 
         if decision == "CONTINUE":
+            log("Execution successful, stopping retries", "LOOP")
             break
 
         attempt += 1
