@@ -1,16 +1,30 @@
 import subprocess
+import os
 
 
-def run_tests():
+def run_tests(test_list=None):
     """
     Executes Playwright tests using subprocess.
+    Supports optional test file filtering.
     """
+
+    test_project_path = os.getenv("TEST_PROJECT_PATH", ".")
+    base_command = os.getenv("PLAYWRIGHT_COMMAND", "npx.cmd playwright test")
+
+    command = base_command.split()
+
+     # 👇 NEW: adds specific tests
+    if test_list:
+        command.extend(test_list)
+
+    print(f"[AGENT] Running command: {' '.join(command)}")
 
     try:
         process = subprocess.run(
-            ["C:\\Program Files\\nodejs\\npx.cmd", "playwright", "test"],
+            command,
             capture_output=True,
-            text=True
+            text=True,
+            cwd=test_project_path
         )
 
         return {
