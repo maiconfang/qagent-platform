@@ -54,6 +54,7 @@ def main():
     agent_timer.start()
 
     phases_metrics = {}
+    execution_history = []
 
     final_result = None
     final_analysis = None
@@ -87,12 +88,21 @@ def main():
         passed = tests_count if analysis["status"] == "SUCCESS" else 0
         failed = tests_count if analysis["status"] != "SUCCESS" else 0
 
+        phase_status = analysis["status"]
+
         phases_metrics[current_phase] = {
+            "status": phase_status,
             "duration": duration,
             "tests": tests_count,
             "passed": passed,
             "failed": failed
         }
+
+        execution_history.append({
+            "phase": current_phase,
+            "status": phase_status,
+            "duration": duration
+        })
 
         log(f"Status: {analysis['status']}", f"{current_phase} | RESULT")
         log(f"duration={duration}s tests={tests_count} passed={passed} failed={failed}", f"{current_phase} | METRICS")
@@ -137,12 +147,21 @@ def main():
         passed = tests_count if analysis["status"] == "SUCCESS" else 0
         failed = tests_count if analysis["status"] != "SUCCESS" else 0
 
+        phase_status = analysis["status"]
+
         phases_metrics[current_phase] = {
+            "status": phase_status,
             "duration": duration,
             "tests": tests_count,
             "passed": passed,
             "failed": failed
         }
+
+        execution_history.append({
+            "phase": current_phase,
+            "status": phase_status,
+            "duration": duration
+        })
 
         log(f"Status: {analysis['status']}", f"{current_phase} | RESULT")
         log(f"duration={duration}s tests={tests_count} passed={passed} failed={failed}", f"{current_phase} | METRICS")
@@ -177,6 +196,20 @@ def main():
     if final_analysis and final_analysis["status"] == "SUCCESS":
         final_decision = "DONE"
 
+    insights = []
+
+    # Insight 1: estabilidade HIGH_IMPACT
+    if phases_metrics.get("HIGH_IMPACT", {}).get("status") == "SUCCESS":
+        insights.append("HIGH_IMPACT phase is stable")
+
+    # Insight 2: EXTENDED execution time impact
+    extended = phases_metrics.get("EXTENDED")
+    if extended:
+        insights.append(f"EXTENDED adds {extended['duration']}s to execution time")
+
+    # Insight 3: total execution time
+    insights.append(f"Total execution time: {total_duration}s")    
+
     report_data = {
         "command": user_input,
         "finalStatus": final_analysis["status"] if final_analysis else "UNKNOWN",
@@ -188,7 +221,9 @@ def main():
         "summary": {
             "failureType": final_analysis.get("failureType") if final_analysis else None,
             "message": final_analysis.get("message") if final_analysis else None
-        }
+        },
+        "history": execution_history,
+        "insights": insights,
     }
 
     generate_report(report_data)
