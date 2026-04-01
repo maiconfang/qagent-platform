@@ -1,11 +1,14 @@
+
 import sys
+import os
+from dotenv import load_dotenv
+
 from core.runner import run_tests
 from core.analyzer import analyze_results
 from core.reporter import generate_report
 from core.decision_engine import decide_next_step
 
-from dotenv import load_dotenv
-import os
+from utils.timer import Timer
 
 load_dotenv()
 
@@ -46,6 +49,11 @@ def main():
     max_attempts = int(os.getenv("MAX_ATTEMPTS", 2))
     attempt = 0
 
+    agent_timer = Timer()
+    agent_timer.start()
+
+    phases_metrics = {}
+
     final_result = None
     final_analysis = None
     final_phase = None
@@ -59,13 +67,31 @@ def main():
         # =========================
         current_phase = "HIGH_IMPACT"
 
+        phase_timer = Timer()
+        phase_timer.start()
+
         log("Running tests...", f"{current_phase} | EXECUTION")
         result = run_tests(PHASES[current_phase])
 
         log("Analyzing results...", f"{current_phase} | ANALYSIS")
         analysis = analyze_results(result)
 
+        phase_timer.stop()
+        duration = phase_timer.duration()
+
+        tests_count = len(PHASES[current_phase])
+        passed = tests_count if analysis["status"] == "SUCCESS" else 0
+        failed = tests_count if analysis["status"] != "SUCCESS" else 0
+
+        phases_metrics[current_phase] = {
+            "duration": duration,
+            "tests": tests_count,
+            "passed": passed,
+            "failed": failed
+        }
+
         log(f"Status: {analysis['status']}", f"{current_phase} | RESULT")
+        log(f"duration={duration}s tests={tests_count} passed={passed} failed={failed}", f"{current_phase} | METRICS")
 
         decision = decide_next_step(analysis)
         log(f"Decision: {decision}", "DECISION")
@@ -75,7 +101,6 @@ def main():
         final_phase = current_phase
         final_decision = decision
 
-        # ❌ STOP = failure scenario
         if decision == "STOP":
             break
 
@@ -84,13 +109,31 @@ def main():
         # =========================
         current_phase = "EXTENDED"
 
+        phase_timer = Timer()
+        phase_timer.start()
+
         log("Running tests...", f"{current_phase} | EXECUTION")
         result = run_tests(PHASES[current_phase])
 
         log("Analyzing results...", f"{current_phase} | ANALYSIS")
         analysis = analyze_results(result)
 
+        phase_timer.stop()
+        duration = phase_timer.duration()
+
+        tests_count = len(PHASES[current_phase])
+        passed = tests_count if analysis["status"] == "SUCCESS" else 0
+        failed = tests_count if analysis["status"] != "SUCCESS" else 0
+
+        phases_metrics[current_phase] = {
+            "duration": duration,
+            "tests": tests_count,
+            "passed": passed,
+            "failed": failed
+        }
+
         log(f"Status: {analysis['status']}", f"{current_phase} | RESULT")
+        log(f"duration={duration}s tests={tests_count} passed={passed} failed={failed}", f"{current_phase} | METRICS")
 
         decision = decide_next_step(analysis)
         log(f"Decision: {decision}", "DECISION")
@@ -100,23 +143,19 @@ def main():
         final_phase = current_phase
         final_decision = decision
 
-        # ❌ STOP = failure scenario
         if decision == "STOP":
             break
 
-        # ✅ NEW: if everything passed, stop loop
         if decision == "CONTINUE":
-             break
+            break
 
-        # Only increment if execution continues
         attempt += 1
 
-    # =========================
-    # REPORT GENERATION
-    # =========================
+    agent_timer.stop()
+    total_duration = agent_timer.duration()
+
     log("Generating structured report...", "REPORT")
 
-    # ✅ NEW: normalize final decision
     if final_analysis and final_analysis["status"] == "SUCCESS":
         final_decision = "DONE"
 
@@ -126,6 +165,8 @@ def main():
         "phase": final_phase,
         "attempts": attempt + 1,
         "decision": final_decision,
+        "duration": total_duration,
+        "phases": phases_metrics,
         "summary": {
             "failureType": final_analysis.get("failureType") if final_analysis else None,
             "message": final_analysis.get("message") if final_analysis else None
