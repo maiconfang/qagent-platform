@@ -1,0 +1,18 @@
+{
+  "project": "taskmanagerplus",
+  "phases": {
+    "HIGH_IMPACT": [
+      "tests/province/province.form.validation.spec.ts",
+      "tests/province/province.create.api.spec.ts",
+      "tests/province/province.edit.api.spec.ts"
+    ],
+    "EXTENDED": [
+      "tests/province/province.menu.navigation.spec.ts",
+      "tests/province/province.search.empty-state.spec.ts"
+    ],
+    "FULL": [
+      "tests/province/province.delete.api.spec.ts",
+      "tests/province/province-ui-legacy.spec.ts"
+    ]
+  }
+}

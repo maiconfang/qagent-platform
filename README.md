@@ -33,4 +33,8 @@ User Input → Agent → Tests → Analysis → Report
 python agent.py "validate recent changes"
 ```
 
+## How to run 
+* Open this **PS C:\dev\workspace\qagent-platform>**
+* type this **python agent.py "validate provinces" --project taskmanagerplus**
+
 Maicon Fang

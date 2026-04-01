@@ -9,6 +9,7 @@ from core.reporter import generate_report
 from core.decision_engine import decide_next_step
 
 from utils.timer import Timer
+from utils.config_loader import load_config
 
 load_dotenv()
 
@@ -20,24 +21,6 @@ def log(message, context=None):
         print(f"[AGENT] {message}")
 
 
-# Define execution phases (system configuration)
-PHASES = {
-    "HIGH_IMPACT": [
-        "tests/province/province.form.validation.spec.ts",
-        "tests/province/province.create.api.spec.ts",
-        "tests/province/province.edit.api.spec.ts"
-    ],
-    "EXTENDED": [
-        "tests/province/province.menu.navigation.spec.ts",
-        "tests/province/province.search.empty-state.spec.ts"
-    ],
-    "FULL": [
-        "tests/province/province.delete.api.spec.ts",
-        "tests/province/province-ui-legacy.spec.ts"
-    ]
-}
-
-
 def main():
     if len(sys.argv) < 2:
         print("Usage: python agent.py \"your command\"")
@@ -45,6 +28,23 @@ def main():
 
     user_input = sys.argv[1]
     log(f"Received command: {user_input}", "INPUT")
+
+    # Default project
+    project_name = "taskmanagerplus"
+
+    # Parse optional --project argument
+    if "--project" in sys.argv:
+        project_index = sys.argv.index("--project")
+        if project_index + 1 < len(sys.argv):
+            project_name = sys.argv[project_index + 1]
+
+    log(f"Using project: {project_name}", "CONFIG")        
+
+    config = load_config(project_name)
+    if "phases" not in config:
+        raise ValueError(f"Invalid config: 'phases' not found for project {project_name}")
+    
+    PHASES = config["phases"]
 
     max_attempts = int(os.getenv("MAX_ATTEMPTS", 2))
     attempt = 0
@@ -117,6 +117,7 @@ def main():
 
         if failure_history.get(current_phase, 0) >= 2:
             log(f"Repeated failure in {current_phase}, stopping retries", "INTELLIGENCE")
+            final_decision = "STOP"
             break
 
         if decision == "STOP":
@@ -176,6 +177,7 @@ def main():
 
         if failure_history.get(current_phase, 0) >= 2:
             log(f"Repeated failure in {current_phase}, stopping retries", "INTELLIGENCE")
+            final_decision = "STOP"
             break
 
         if decision == "STOP":
@@ -198,7 +200,7 @@ def main():
 
     insights = []
 
-    # Insight 1: estabilidade HIGH_IMPACT
+    # Insight 1: HIGH_IMPACT stability check
     if phases_metrics.get("HIGH_IMPACT", {}).get("status") == "SUCCESS":
         insights.append("HIGH_IMPACT phase is stable")
 
