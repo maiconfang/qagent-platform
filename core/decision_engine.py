@@ -1,29 +1,38 @@
-def decide_next_step(analysis):
-    """
-    Decision logic based on failure type.
-    """
-
+def decide_next_step(analysis, phase_name=None, failure_history=None):
     status = analysis.get("status")
 
-    # ✅ SUCCESS → continue to next phase
+    # SUCCESS → continue normal execution
     if status == "SUCCESS":
-        return "CONTINUE"
+        return {
+            "action": "CONTINUE",
+            "reason": f"{phase_name} execution succeeded"
+        }
 
-    failure_type = analysis.get("failure_type")
+    # FAILURE → apply decision logic
+    if status == "FAILURE":
 
-    # 🔁 Retry scenarios
-    if failure_type == "TIMEOUT":
-        return "RETRY"
+        # If this phase already failed before → stop execution
+        if failure_history and failure_history.get(phase_name, 0) >= 1:
+            return {
+                "action": "STOP",
+                "reason": f"{phase_name} failed twice - stopping execution"
+            }
 
-    if failure_type == "NETWORK_ERROR":
-        return "RETRY"
+        # If HIGH_IMPACT phase fails → stop immediately (critical)
+        if phase_name == "HIGH_IMPACT":
+            return {
+                "action": "STOP",
+                "reason": f"{phase_name} is critical - stopping execution"
+            }
 
-    # 🛑 Stop scenarios (critical or functional failures)
-    if failure_type == "ELEMENT_NOT_FOUND":
-        return "STOP"
+        # Otherwise → retry execution
+        return {
+            "action": "RETRY",
+            "reason": f"{phase_name} execution failed - retry triggered"
+        }
 
-    if failure_type == "ASSERTION_FAILURE":
-        return "STOP"
-
-    # 🛑 Default fallback
-    return "STOP"
+    # Fallback for unexpected states
+    return {
+        "action": "UNKNOWN",
+        "reason": "Unexpected state"
+    }

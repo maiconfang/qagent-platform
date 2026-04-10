@@ -11,6 +11,7 @@ from utils.timer import Timer
 from utils.config_loader import load_config
 from models.execution_result import ExecutionResult
 from models.phase_result import PhaseResult
+from models.execution_state import ExecutionState
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -48,7 +49,7 @@ class Agent:
 
         return project_name, config
 
-    def execute_phase(self, phase_name, phase_tests, failure_history):
+    def execute_phase(self, phase_name, phase_tests, state):    
         phase_timer = Timer()
         phase_timer.start()
 
@@ -59,7 +60,7 @@ class Agent:
         analysis = analyze_results(result)
 
         if analysis["status"] != "SUCCESS":
-            failure_history[phase_name] = failure_history.get(phase_name, 0) + 1
+            state.record_failure(phase_name)
 
         phase_timer.stop()
         duration = phase_timer.duration()
@@ -76,7 +77,11 @@ class Agent:
             passed=passed,
             failed=failed
         )
-        decision = decide_next_step(analysis)
+        decision = decide_next_step(
+            analysis,
+            phase_name=phase_name,
+            failure_history=state.failures
+        )
 
         return phase_result, analysis, decision
 
@@ -96,11 +101,11 @@ class Agent:
         phases = domains[domain]["phases"]
 
         execution_result = ExecutionResult(user_input)
+        state = ExecutionState(goal=user_input, project=project_name)
 
         agent_timer = Timer()
         agent_timer.start()
 
-        failure_history = {}
 
         try:
             for phase_name, phase_tests in phases.items():
@@ -108,7 +113,7 @@ class Agent:
                 phase_result, analysis, decision = self.execute_phase(
                     phase_name,
                     phase_tests,
-                    failure_history
+                    state
                 )
 
                 execution_result.update_phase(
@@ -119,9 +124,9 @@ class Agent:
                     decision
                 )
 
-                log(f"Decision: {decision}", "DECISION")
+                log(f"Decision: {decision['action']} ({decision['reason']})", "DECISION")
 
-                if failure_history.get(phase_name, 0) >= 2 or decision == "STOP":
+                if state.failures.get(phase_name, 0) >= 2 or decision["action"] == "STOP":    
                     break
 
         finally:
