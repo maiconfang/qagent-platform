@@ -10,6 +10,7 @@ from core.decision_engine import decide_next_step
 from utils.timer import Timer
 from utils.config_loader import load_config
 from models.execution_result import ExecutionResult
+from models.phase_result import PhaseResult
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -67,23 +68,17 @@ class Agent:
         passed = tests_count if analysis["status"] == "SUCCESS" else 0
         failed = tests_count if analysis["status"] != "SUCCESS" else 0
 
-        metrics = {
-            "status": analysis["status"],
-            "duration": duration,
-            "tests": tests_count,
-            "passed": passed,
-            "failed": failed
-        }
-
-        history_entry = {
-            "phase": phase_name,
-            "status": analysis["status"],
-            "duration": duration
-        }
-
+        phase_result = PhaseResult(
+            name=phase_name,
+            status=analysis["status"],
+            duration=duration,
+            tests=tests_count,
+            passed=passed,
+            failed=failed
+        )
         decision = decide_next_step(analysis)
 
-        return metrics, history_entry, analysis, decision
+        return phase_result, analysis, decision
 
     def run(self, user_input: str):
         log(f"Received command: {user_input}", "INPUT")
@@ -100,7 +95,7 @@ class Agent:
 
         phases = domains[domain]["phases"]
 
-        result = ExecutionResult(user_input)
+        execution_result = ExecutionResult(user_input)
 
         agent_timer = Timer()
         agent_timer.start()
@@ -110,16 +105,16 @@ class Agent:
         try:
             for phase_name, phase_tests in phases.items():
 
-                metrics, history_entry, analysis, decision = self.execute_phase(
+                phase_result, analysis, decision = self.execute_phase(
                     phase_name,
                     phase_tests,
                     failure_history
                 )
 
-                result.update_phase(
+                execution_result.update_phase(
                     phase_name,
-                    metrics,
-                    history_entry,
+                    phase_result.to_metrics(),
+                    phase_result.to_history_entry(),
                     analysis,
                     decision
                 )
@@ -131,14 +126,14 @@ class Agent:
 
         finally:
             agent_timer.stop()
-            result.duration = agent_timer.duration()
+            execution_result.duration = agent_timer.duration()
 
             log("Generating structured report...", "REPORT")
 
-            if result.final_analysis and result.final_analysis["status"] == "SUCCESS":
-                result.final_decision = "DONE"
+            if execution_result.final_analysis and execution_result.final_analysis["status"] == "SUCCESS":
+                execution_result.final_decision = "DONE"
 
-            report_data = self.build_report(result)
+            report_data = self.build_report(execution_result)
 
             generate_report(report_data)
 
