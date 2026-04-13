@@ -12,7 +12,7 @@ def analyze_results(result):
 
     analysis = {
         "status": "SUCCESS" if return_code == 0 else "FAILURE",
-        "failure_type": None,
+        "error_type": None,
         "failed_tests": 0,
         "error_summary": None
     }
@@ -23,7 +23,7 @@ def analyze_results(result):
         error_summary = extract_error_summary(stderr or stdout)
 
         analysis.update({
-            "failure_type": failure_type,
+            "error_type": failure_type,
             "failed_tests": failed_tests,
             "error_summary": error_summary
         })
@@ -38,16 +38,16 @@ def detect_failure_type(stdout, stderr):
         return "TIMEOUT"
 
     if "locator" in combined or "element not found" in combined:
-        return "ELEMENT_NOT_FOUND"
+        return "LOCATOR"
 
     if "expect" in combined:
-        return "ASSERTION_FAILURE"
+        return "ASSERTION"
 
     if "net::err" in combined or "failed to fetch" in combined:
-        return "NETWORK_ERROR"
-    
+        return "API"
+
     if "winerror 2" in combined or "cannot find the file" in combined:
-        return "ENVIRONMENT_ERROR"
+        return "ENVIRONMENT"
 
     return "UNKNOWN"
 

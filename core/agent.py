@@ -124,7 +124,10 @@ class Agent:
                     decision
                 )
 
-                log(f"Decision: {decision['action']} ({decision['reason']})", "DECISION")
+                log(
+                    f"Decision: {decision['action']} ({decision['reason']}) | Error: {analysis.get('error_type')}",
+                    "DECISION"
+                )
 
                 if state.failures.get(phase_name, 0) >= 2 or decision["action"] == "STOP":    
                     break

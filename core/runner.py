@@ -17,13 +17,15 @@ def run_tests(test_list=None):
         process = subprocess.run(
             " ".join(command),
             cwd=test_project_path,
-            shell=True
+            shell=True,
+            capture_output=True,
+            text=True
         )
 
         return {
             "returncode": process.returncode,
-            "stdout": "",
-            "stderr": ""
+            "stdout": process.stdout,
+            "stderr": process.stderr
         }
 
     except Exception as e:

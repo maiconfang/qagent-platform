@@ -7,7 +7,8 @@
         "HIGH_IMPACT": [
           "tests/province/province.form.validation.spec.ts",
           "tests/province/province.create.api.spec.ts",
-          "tests/province/province.edit.api.spec.ts"
+          "tests/province/province.edit.api.spec.ts",
+          "tests/province/province.fail.locator.spec.ts"
         ],
         "EXTENDED": [
           "tests/province/province.menu.navigation.spec.ts",
