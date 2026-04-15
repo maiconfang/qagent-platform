@@ -13,6 +13,8 @@ from models.execution_result import ExecutionResult
 from models.phase_result import PhaseResult
 from models.execution_state import ExecutionState
 
+from utils.state_store import load_state, save_state
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -106,6 +108,9 @@ class Agent:
         execution_result = ExecutionResult(user_input)
         state = ExecutionState(goal=user_input, project=project_name)
 
+        persisted = load_state()
+        state.load_from_dict(persisted)
+
         agent_timer = Timer()
         agent_timer.start()
 
@@ -150,6 +155,8 @@ class Agent:
 
             generate_report(report_data)
 
+            # 👇 persist state
+            save_state(state.to_dict())
             log("Done.", "END")
 
     def build_report(self, result: ExecutionResult):

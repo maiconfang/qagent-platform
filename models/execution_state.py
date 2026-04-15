@@ -26,3 +26,13 @@ class ExecutionState:
     def record_action(self, action):
         self.action_history.append(action)
         self.last_action = action
+
+    def to_dict(self):
+        return {
+            "failures": self.failures,
+            "phase_history": self.phase_history
+        }
+
+    def load_from_dict(self, data):
+        self.failures = data.get("failures", {})
+        self.phase_history = data.get("phase_history", {})        

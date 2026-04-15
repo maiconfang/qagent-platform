@@ -1,0 +1,19 @@
+{
+  "failures": {
+    "HIGH_IMPACT": 1
+  },
+  "phase_history": {
+    "HIGH_IMPACT": [
+      "SUCCESS",
+      "FAILURE"
+    ],
+    "EXTENDED": [
+      "SUCCESS",
+      "SUCCESS"
+    ],
+    "FULL": [
+      "SUCCESS",
+      "SUCCESS"
+    ]
+  }
+}
