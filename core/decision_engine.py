@@ -1,3 +1,6 @@
+from core.flaky_detector import is_flaky
+
+
 def decide_next_step(analysis, phase_name=None, failure_history=None):
     status = analysis.get("status")
     error_type = analysis.get("error_type")
@@ -11,6 +14,15 @@ def decide_next_step(analysis, phase_name=None, failure_history=None):
 
     # FAILURE → apply decision logic
     if status == "FAILURE":
+
+        history = failure_history.get(phase_name, [])
+
+        # 🔥 FLAKY DETECTION (NEW)
+        if is_flaky(history):
+            return {
+                "action": "RETRY",
+                "reason": f"{phase_name} shows flaky behavior (history={history})"
+            }
 
         # 🔥 HIGH_IMPACT should always stop immediately (critical phase)
         if phase_name == "HIGH_IMPACT":
@@ -42,10 +54,10 @@ def decide_next_step(analysis, phase_name=None, failure_history=None):
 
         # Assertion → retry once, then stop
         if error_type == "ASSERTION":
-            if failure_history and failure_history.get(phase_name, 0) >= 1:
+            if history and len(history) >= 2:
                 return {
                     "action": "STOP",
-                    "reason": f"{phase_name} assertion failed twice - stopping"
+                    "reason": f"{phase_name} assertion failed multiple times - stopping"
                 }
             return {
                 "action": "RETRY",
@@ -53,17 +65,16 @@ def decide_next_step(analysis, phase_name=None, failure_history=None):
             }
 
         # Fallback (generic failure)
-        if failure_history and failure_history.get(phase_name, 0) >= 1:
+        if history and len(history) >= 2:
             return {
                 "action": "STOP",
-                "reason": f"{phase_name} failed twice - stopping"
+                "reason": f"{phase_name} failed multiple times - stopping"
             }
 
         return {
             "action": "RETRY",
             "reason": f"{phase_name} execution failed - retry triggered"
         }
-    
 
     # Fallback for unexpected states
     return {

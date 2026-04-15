@@ -59,6 +59,9 @@ class Agent:
         log("Analyzing results...", f"{phase_name} | ANALYSIS")
         analysis = analyze_results(result)
 
+        # Flaky tracking
+        state.record_phase_result(phase_name, analysis["status"])
+
         if analysis["status"] != "SUCCESS":
             state.record_failure(phase_name)
 
@@ -80,7 +83,7 @@ class Agent:
         decision = decide_next_step(
             analysis,
             phase_name=phase_name,
-            failure_history=state.failures
+            failure_history=state.phase_history
         )
 
         return phase_result, analysis, decision
@@ -123,6 +126,8 @@ class Agent:
                     analysis,
                     decision
                 )
+
+                log(f"Phase history: {state.phase_history}", "DEBUG")
 
                 log(
                     f"Decision: {decision['action']} ({decision['reason']}) | Error: {analysis.get('error_type')}",

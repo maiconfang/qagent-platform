@@ -4,13 +4,25 @@ class ExecutionState:
     def __init__(self, goal, project):
         self.goal = goal
         self.project = project
-        self.failures = {}        # failures per phase
-        self.history = []         # actions taken
+
+        # Failure tracking (per phase)
+        self.failures = {}
+
+        # Phase execution history (for flaky detection)
+        self.phase_history = {}
+
+        # Action tracking (future use)
+        self.action_history = []
         self.last_action = None
 
     def record_failure(self, phase_name):
         self.failures[phase_name] = self.failures.get(phase_name, 0) + 1
 
+    def record_phase_result(self, phase_name, status):
+        if phase_name not in self.phase_history:
+            self.phase_history[phase_name] = []
+        self.phase_history[phase_name].append(status)
+
     def record_action(self, action):
-        self.history.append(action)
+        self.action_history.append(action)
         self.last_action = action

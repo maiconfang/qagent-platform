@@ -19,7 +19,9 @@ def run_tests(test_list=None):
             cwd=test_project_path,
             shell=True,
             capture_output=True,
-            text=True
+            text=True,
+            encoding="utf-8",
+            errors="ignore"
         )
 
         return {
