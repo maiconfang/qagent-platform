@@ -1,6 +1,6 @@
 {
   "failures": {
-    "HIGH_IMPACT": 6
+    "HIGH_IMPACT": 8
   },
   "phase_history": {
     "HIGH_IMPACT": [
@@ -15,6 +15,9 @@
       "FAILURE",
       "SUCCESS",
       "SUCCESS",
+      "SUCCESS",
+      "FAILURE",
+      "FAILURE",
       "SUCCESS"
     ],
     "EXTENDED": [
@@ -24,6 +27,28 @@
     "FULL": [
       "SUCCESS",
       "SUCCESS"
+    ]
+  },
+  "test_history": {
+    "\u001b[1A\u001b[2K[1/1] [chromium] › tests\\province\\province.flaky.spec.ts:5:7 › Flaky Simulation (Controlled) › should randomly pass or fail": [
+      "FAILURE",
+      "FAILURE"
+    ],
+    "\u001b[1A\u001b[2K  1) [chromium] › tests\\province\\province.flaky.spec.ts:5:7 › Flaky Simulation (Controlled) › should randomly pass or fail": [
+      "FAILURE",
+      "FAILURE"
+    ],
+    "[chromium] › tests\\province\\province.flaky.spec.ts:5:7 › Flaky Simulation (Controlled) › should randomly pass or fail": [
+      "FAILURE",
+      "FAILURE"
+    ],
+    "9 |     if (shouldFail) {": [
+      "FAILURE",
+      "FAILURE"
+    ],
+    "\u001b[1A\u001b[2K[chromium] › tests\\province\\province.flaky.spec.ts:5:7 › Flaky Simulation (Controlled) › should randomly pass or fail": [
+      "FAILURE",
+      "FAILURE"
     ]
   }
 }

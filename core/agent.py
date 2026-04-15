@@ -62,6 +62,9 @@ class Agent:
         log("Analyzing results...", f"{phase_name} | ANALYSIS")
         analysis = analyze_results(result)
 
+        for test_name in analysis.get("tests", []):
+            state.record_test_result(test_name, analysis["status"])
+
         # Flaky tracking
         state.record_phase_result(phase_name, analysis["status"])
 
@@ -200,6 +203,15 @@ class Agent:
                 insights.append(
                     f"Adaptive decision applied: RETRY instead of STOP for {phase_name}"
                 )
+
+        for test_name, history in state.test_history.items():
+            if len(set(history)) > 1:
+                history_str = " → ".join(history)
+
+                insights.append(
+                    f"FLAKY TEST DETECTED: {test_name} "
+                    f"(history={history_str})"
+                )        
 
         report_data["insights"] = insights
 

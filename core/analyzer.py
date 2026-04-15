@@ -14,7 +14,8 @@ def analyze_results(result):
         "status": "SUCCESS" if return_code == 0 else "FAILURE",
         "error_type": None,
         "failed_tests": 0,
-        "error_summary": None
+        "error_summary": None,
+        "tests": []
     }
 
     if return_code != 0:
@@ -27,6 +28,8 @@ def analyze_results(result):
             "failed_tests": failed_tests,
             "error_summary": error_summary
         })
+
+    analysis["tests"] = extract_test_names(stdout)
 
     return analysis
 
@@ -67,3 +70,18 @@ def extract_error_summary(output):
             return line.strip()
 
     return lines[-1] if lines else "No error summary available"
+
+
+def extract_test_names(stdout):
+    tests = []
+
+    for line in stdout.splitlines():
+        line = line.strip()
+
+        if line.startswith("✓") or line.startswith("✘"):
+            line = line[1:].strip()
+
+        if line.lower().startswith("should"):
+            tests.append(line)
+
+    return list(dict.fromkeys(tests))

@@ -15,6 +15,8 @@ class ExecutionState:
         self.action_history = []
         self.last_action = None
 
+        self.test_history = {}
+
     def record_failure(self, phase_name):
         self.failures[phase_name] = self.failures.get(phase_name, 0) + 1
 
@@ -23,6 +25,13 @@ class ExecutionState:
             self.phase_history[phase_name] = []
         self.phase_history[phase_name].append(status)
 
+
+    def record_test_result(self, test_name, status):
+        if test_name not in self.test_history:
+            self.test_history[test_name] = []
+
+        self.test_history[test_name].append(status)
+
     def record_action(self, action):
         self.action_history.append(action)
         self.last_action = action
@@ -30,9 +39,11 @@ class ExecutionState:
     def to_dict(self):
         return {
             "failures": self.failures,
-            "phase_history": self.phase_history
+            "phase_history": self.phase_history,
+            "test_history": self.test_history
         }
 
     def load_from_dict(self, data):
         self.failures = data.get("failures", {})
-        self.phase_history = data.get("phase_history", {})        
+        self.phase_history = data.get("phase_history", {})
+        self.test_history = data.get("test_history", {})        
