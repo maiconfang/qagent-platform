@@ -14,6 +14,7 @@ from models.phase_result import PhaseResult
 from models.execution_state import ExecutionState
 
 from utils.state_store import load_state, save_state
+from core.html_reporter import generate_html_report
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -154,6 +155,7 @@ class Agent:
             report_data = self.build_report(execution_result, state)
 
             generate_report(report_data)
+            generate_html_report(report_data)
 
             # 👇 persist state
             save_state(state.to_dict())
@@ -172,7 +174,9 @@ class Agent:
 
         insights = []
 
-        if result.phases_metrics.get("HIGH_IMPACT", {}).get("status") == "SUCCESS":
+        is_flaky = any(len(set(h)) > 1 for h in state.phase_history.values())
+
+        if not is_flaky and result.phases_metrics.get("HIGH_IMPACT", {}).get("status") == "SUCCESS":
             insights.append("HIGH_IMPACT phase is stable")
 
         extended = result.phases_metrics.get("EXTENDED")
