@@ -151,7 +151,7 @@ class Agent:
             if execution_result.final_analysis and execution_result.final_analysis["status"] == "SUCCESS":
                 execution_result.final_decision = "DONE"
 
-            report_data = self.build_report(execution_result)
+            report_data = self.build_report(execution_result, state)
 
             generate_report(report_data)
 
@@ -159,7 +159,7 @@ class Agent:
             save_state(state.to_dict())
             log("Done.", "END")
 
-    def build_report(self, result: ExecutionResult):
+    def build_report(self, result: ExecutionResult, state: ExecutionState):
         report_data = {
             "command": result.command,
             "finalStatus": result.final_analysis["status"] if result.final_analysis else "UNKNOWN",
@@ -181,8 +181,21 @@ class Agent:
 
         insights.append(f"Total execution time: {result.duration}s")
 
-        if any(h["status"] == "FAILURE" for h in result.execution_history):
-            insights.append("Potential flaky behavior detected")
+        phase_history_map = state.phase_history
+
+        # Detect flaky behavior
+        for phase_name, history in phase_history_map.items():
+            if history and len(set(history)) > 1:
+                history_str = " → ".join(history)
+
+                insights.append(
+                    f"FLAKY DETECTED: {phase_name} alternates between SUCCESS and FAILURE "
+                    f"(history={history_str})"
+                )
+
+                insights.append(
+                    f"Adaptive decision applied: RETRY instead of STOP for {phase_name}"
+                )
 
         report_data["insights"] = insights
 

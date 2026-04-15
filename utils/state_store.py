@@ -17,4 +17,4 @@ def load_state():
 
 def save_state(state_data):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(state_data, f, indent=2)
+        json.dump(state_data, f, indent=2, ensure_ascii=False)

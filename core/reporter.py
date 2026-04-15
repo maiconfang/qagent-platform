@@ -23,7 +23,7 @@ def generate_report(*args):
         file_path = f"reports/report_{timestamp}.json"
 
         with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(report_data, f, indent=2)
+            json.dump(report_data, f, indent=2, ensure_ascii=False)
 
         print(f"[REPORT] Saved to {file_path}")
         return
