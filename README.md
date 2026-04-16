@@ -1,40 +1,210 @@
-# QAgent 🤖
+# 🤖 QAgent Platform — Agentic QA Engine
 
-**An Agentic QA Platform for Intelligent Test Analysis**
-
----
-
-## 🚀 Overview
-
-QAgent is a modular and scalable Agentic QA system designed to automate testing workflows.
-
-It executes tests, analyzes results, and generates insights to help engineers detect issues faster.
+An intelligent QA automation orchestrator that executes tests, analyzes results, and makes decisions based on real evidence.
 
 ---
 
-## 🧠 Vision
+## 💡 Overview
 
-- Think like a QA engineer  
-- React to system changes  
-- Provide intelligent insights  
-- Evolve continuously  
+QAgent Platform is an **Agentic QA Engine** designed to simulate how a real QA engineer thinks:
+
+- Execute tests
+- Analyze failures
+- Classify issues
+- Decide next actions
+- Generate reports
+
+All of this **automatically, consistently, and based on evidence — not assumptions**.
 
 ---
 
-## ⚙️ How It Works
+## 🧠 Core Concept
 
-User Input → Agent → Tests → Analysis → Report
+Traditional automation:
+> Run tests → Get results
+
+QAgent Platform:
+> Run tests → Understand results → Decide what to do next
 
 ---
 
-## ▶️ Run
+## ⚙️ Architecture
+
+Agent  
+  ↓  
+Executor (Playwright CLI)  
+  ↓  
+Analyzer (Failure classification)  
+  ↓  
+Decision Engine (CONTINUE / RETRY / STOP)  
+  ↓  
+Reporter (JSON + Insights)  
+
+---
+
+## 🔍 Features
+
+✔ Playwright test execution (UI + API)  
+✔ Failure classification (TIMEOUT, LOCATOR, API, etc.)  
+✔ Adaptive decision engine  
+✔ Multi-phase execution strategy  
+✔ Flaky detection (phase-level and test-level)  
+✔ Persistent execution state  
+✔ Structured JSON reports  
+✔ Designed for multi-project scalability  
+
+---
+
+## 🧪 Execution Flow
+
+Example command:
 
 ```bash
-python agent.py "validate recent changes"
+python agent.py "validate provinces" --project taskmanagerplus
 ```
 
-## How to run 
-* Open this **PS C:\dev\workspace\qagent-platform>**
-* type this **python agent.py "validate provinces" --project taskmanagerplus**
+### What happens:
 
-Maicon Fang
+1. Detect domain → `provinces`
+2. Load project configuration
+3. Execute phases:
+
+- HIGH_IMPACT
+- EXTENDED
+- FULL (optional)
+
+4. Analyze results
+5. Decide next step:
+
+- CONTINUE
+- RETRY
+- STOP
+
+---
+
+## 📊 Example Output
+
+```
+[AGENT][HIGH_IMPACT | RESULT] Status: SUCCESS
+[AGENT][DECISION] Decision: CONTINUE
+
+[AGENT][EXTENDED | RESULT] Status: SUCCESS
+[AGENT][DECISION] Decision: DONE
+```
+
+---
+
+## 🧾 Example Final Report
+
+```
+Change detected: New field added to Provinces page
+
+Execution summary:
+- UI tests executed (Playwright)
+- API validations performed
+- Jenkins pipeline triggered
+- AI Analyzer used for failure classification
+
+Results:
+- 15 tests executed
+- 0 failures
+- 2 new validation tests generated
+
+Confidence level: HIGH
+
+Conclusion:
+No issues detected. The system remains stable after the change.
+```
+
+---
+
+## 🧠 Intelligence Layer
+
+The Analyzer applies **deterministic logic + heuristics**, such as:
+
+- Timeout → UI_TIMEOUT
+- 404 → RESOURCE_NOT_FOUND
+- 403 → AUTH_FAILURE
+- Invalid input → VALIDATION_ERROR
+
+No hallucination.  
+Only **evidence-based classification**.
+
+---
+
+## 🔁 Decision Engine
+
+The system decides dynamically:
+
+| Condition | Action |
+|----------|--------|
+| Critical failure | STOP |
+| Minor issues | RETRY |
+| Stable execution | CONTINUE |
+
+---
+
+## 📂 Project Structure
+
+```
+qagent-platform/
+├── agent.py
+├── analyzer/
+├── executor/
+├── decision_engine/
+├── reporter/
+├── configs/
+└── reports/
+```
+
+---
+
+## 🔧 Configuration
+
+Example `.env`:
+
+```
+TEST_PROJECT_PATH=C:\dev\workspace\taskmanagerplus-tests\ui-tests
+PLAYWRIGHT_COMMAND=npx.cmd playwright test
+MAX_ATTEMPTS=2
+```
+
+---
+
+## 📈 Roadmap
+
+- [ ] HTML Report (visual insights)
+- [ ] AI-powered root cause analysis
+- [ ] Integration with AI Analyzer project
+- [ ] Multi-project orchestration
+- [ ] CI/CD deep integration
+
+---
+
+## 🎯 Vision
+
+Move from:
+
+> “Running tests”
+
+To:
+
+> “Understanding quality automatically”
+
+---
+
+## 👨‍💻 Author
+
+**Maicon Fang**  
+QA Engineer | Test Automation | Agentic QA  
+
+📌 Portfolio: https://maiconfang.github.io/portfolio/  
+📌 YouTube: Maicon Fang IT and Quality Assurance
+
+---
+
+## ⭐ Final Thought
+
+This project is not just about automation.
+
+It’s about building a system that **thinks like QA**.
