@@ -78,10 +78,16 @@ def extract_test_names(stdout):
     for line in stdout.splitlines():
         line = line.strip()
 
-        if line.startswith("✓") or line.startswith("✘"):
-            line = line[1:].strip()
+        if not line:
+            continue
 
-        if line.lower().startswith("should"):
-            tests.append(line)
+        # Detect Playwright test result lines
+        if "›" in line:
+            parts = line.split("›")
 
+            if len(parts) >= 2:
+                test_name = parts[-1].strip()
+                tests.append(test_name)
+
+    # Remove duplicates while preserving order
     return list(dict.fromkeys(tests))

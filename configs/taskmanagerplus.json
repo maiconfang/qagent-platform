@@ -5,7 +5,9 @@
     "provinces": {
       "phases": {
         "HIGH_IMPACT": [
-          "tests/province/province.flaky.spec.ts"
+          "tests/province/province.flaky.spec.ts",
+          "tests/province/province.create.api.spec.ts"
+          
         ],
         "EXTENDED": [
           "tests/province/province.menu.navigation.spec.ts",

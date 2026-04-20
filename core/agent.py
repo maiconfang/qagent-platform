@@ -62,6 +62,8 @@ class Agent:
         log("Analyzing results...", f"{phase_name} | ANALYSIS")
         analysis = analyze_results(result)
 
+        print("[DEBUG] tests:", analysis.get("tests"))
+
         for test_name in analysis.get("tests", []):
             state.record_test_result(test_name, analysis["status"])
 
@@ -211,7 +213,18 @@ class Agent:
                 insights.append(
                     f"FLAKY TEST DETECTED: {test_name} "
                     f"(history={history_str})"
-                )        
+                )
+
+            # 🔥 NEW: Stability Score    
+            total = len(history)
+            success = history.count("SUCCESS")
+
+            stability = (success / total) * 100 if total > 0 else 0
+
+            if total >= 2:   
+                insights.append(
+                    f"STABILITY: {test_name} → {stability:.0f}% stable"
+                )         
 
         report_data["insights"] = insights
 

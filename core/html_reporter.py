@@ -1,6 +1,13 @@
 def generate_html_report(report_data):
     status = report_data.get("finalStatus", "UNKNOWN")
 
+    decision = report_data.get("decision")
+
+    if isinstance(decision, dict):
+        decision_display = decision.get("action", "UNKNOWN")
+    else:
+        decision_display = decision or "UNKNOWN"
+
     status_class = "success"
     if status == "FAILURE":
         status_class = "fail"
@@ -20,7 +27,55 @@ def generate_html_report(report_data):
             history_display = insight.split("history=")[-1].replace(")", "")
             break
 
-    insights_html = "".join(f"<li>{i}</li>" for i in report_data.get("insights", []))
+    # 🔥 NEW: extract stability insights
+    stability_items = [
+        i for i in report_data.get("insights", [])
+        if i.startswith("STABILITY:")
+    ]
+
+    filtered_insights = [
+        i for i in report_data.get("insights", [])
+        if not i.startswith("STABILITY:")
+    ]
+
+    insights_html = "".join(f"<li>{i}</li>" for i in filtered_insights)
+
+    stability_html = ""
+
+    for item in stability_items:
+        # Example: STABILITY: test → 43% stable
+        try:
+
+            parts = item.split("→")
+            if len(parts) != 2:
+                continue
+
+            name_part, value_part = parts
+
+            test_name = name_part.replace("STABILITY:", "").strip()
+            stability_value = value_part.replace("stable", "").strip()
+
+            value_num = int(stability_value.replace("%", ""))
+
+            # Color logic
+            if value_num >= 85:
+                color = "success"
+            elif value_num >= 60:
+                color = "flaky"
+            else:
+                color = "fail"
+
+            stability_html += f"""
+            <li>
+                {test_name} →
+                <span class="badge {color}">
+                    {value_num}%
+                </span>
+            </li>
+            """
+
+        except Exception:
+            continue
 
     html = f"""
     <html>
@@ -100,12 +155,20 @@ def generate_html_report(report_data):
                 <h2>📊 Phase Details</h2>
 
                 <p><strong>Phase:</strong> {report_data.get("phase")}</p>
-                <p><strong>Decision:</strong> {report_data.get("decision")}</p>
+                <p><strong>Decision:</strong> {decision_display}</p>
 
                 <div class="history">
                     <strong>History:</strong><br>
                     {history_display if history_display else "No history available"}
                 </div>
+            </div>
+
+            
+            <div class="card">
+                <h2>📊 Stability</h2>
+                <ul>
+                    {stability_html if stability_html else "<li>No stability data</li>"}
+                </ul>
             </div>
 
             <div class="card">

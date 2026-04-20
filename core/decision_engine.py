@@ -1,9 +1,29 @@
 from core.flaky_detector import is_flaky
 
 
-def decide_next_step(analysis, phase_name=None, failure_history=None):
+def decide_next_step(analysis, phase_name=None, failure_history=None, state=None):
     status = analysis.get("status")
     error_type = analysis.get("error_type")
+
+    # 🔥 NEW: stability calculation (safe)
+
+    avg_stability = 100
+
+    if state and hasattr(state, "test_history"):
+        test_histories = state.test_history.values()
+
+        stability_scores = []
+
+        for history in test_histories:
+            total = len(history)
+            success = history.count("SUCCESS")
+
+            if total > 0:
+                stability = (success / total) * 100
+                stability_scores.append(stability)
+
+        if stability_scores:
+            avg_stability = sum(stability_scores) / len(stability_scores)
 
     # SUCCESS → continue normal execution
     if status == "SUCCESS":
@@ -19,10 +39,24 @@ def decide_next_step(analysis, phase_name=None, failure_history=None):
 
         # 🔥 FLAKY DETECTION (NEW)
         if is_flaky(history):
-            return {
-                "action": "RETRY",
-                "reason": f"{phase_name} shows flaky behavior (history={history})"
-            }
+
+            if avg_stability < 60:
+                return {
+                    "action": "RETRY",
+                    "reason": f"{phase_name} shows critical flaky behavior (stability={avg_stability:.0f}%)"
+                }
+
+            elif avg_stability < 85:
+                return {
+                    "action": "RETRY",
+                    "reason": f"{phase_name} shows moderate flaky behavior (stability={avg_stability:.0f}%)"
+                }
+
+            else:
+                return {
+                    "action": "CONTINUE",
+                    "reason": f"{phase_name} flaky but stable overall (stability={avg_stability:.0f}%)"
+                }
 
         # 🔥 HIGH_IMPACT should always stop immediately (critical phase)
         if phase_name == "HIGH_IMPACT":

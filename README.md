@@ -199,7 +199,7 @@ To:
 QA Engineer | Test Automation | Agentic QA  
 
 📌 Portfolio: https://maiconfang.github.io/portfolio/  
-📌 YouTube: Maicon Fang IT and Quality Assurance
+📌 YouTube: [Maicon Fang IT and Quality Assurance](https://www.youtube.com/@maiconfangitqa)
 
 ---
 
