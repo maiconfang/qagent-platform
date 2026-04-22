@@ -1,7 +1,7 @@
 import re
 
 
-def analyze_results(result):
+def analyze_results(result, json_data=None):
     """
     Enhanced analyzer with basic failure classification.
     """
@@ -29,7 +29,10 @@ def analyze_results(result):
             "error_summary": error_summary
         })
 
-    analysis["tests"] = extract_test_names(stdout)
+    if json_data:
+        analysis["tests"] = extract_tests_from_json(json_data)
+    else:
+        analysis["tests"] = extract_test_names(stdout)
 
     return analysis
 
@@ -91,3 +94,25 @@ def extract_test_names(stdout):
 
     # Remove duplicates while preserving order
     return list(dict.fromkeys(tests))
+
+def extract_tests_from_json(data):
+    tests = []
+
+    for suite in data.get("suites", []):
+        for inner_suite in suite.get("suites", []):
+            for spec in inner_suite.get("specs", []):
+                test_name = spec.get("title")
+
+                for test in spec.get("tests", []):
+                    results = test.get("results", [])
+                    if not results:
+                        continue
+
+                    status = results[0].get("status")
+
+                    tests.append({
+                        "name": test_name,
+                        "status": status
+                    })
+
+    return tests

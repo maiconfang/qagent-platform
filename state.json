@@ -1,6 +1,6 @@
 {
   "failures": {
-    "HIGH_IMPACT": 5
+    "HIGH_IMPACT": 7
   },
   "phase_history": {
     "HIGH_IMPACT": [
@@ -14,7 +14,13 @@
       "FAILURE",
       "FAILURE",
       "SUCCESS",
-      "SUCCESS"
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "FAILURE",
+      "FAILURE"
     ],
     "EXTENDED": [
       "SUCCESS",
@@ -36,13 +42,25 @@
       "FAILURE",
       "FAILURE",
       "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
       "SUCCESS"
     ],
     "should randomly pass or fail": [
       "FAILURE",
       "FAILURE",
       "SUCCESS",
-      "SUCCESS"
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "FAILURE",
+      "FAILURE"
     ]
   }
 }

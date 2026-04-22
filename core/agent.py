@@ -2,6 +2,7 @@
 
 import sys
 import os
+import json
 from core.runner import run_tests
 from core.analyzer import analyze_results
 from core.reporter import generate_report
@@ -18,6 +19,8 @@ from core.html_reporter import generate_html_report
 
 from dotenv import load_dotenv
 load_dotenv()
+
+PLAYWRIGHT_JSON_PATH = "../taskmanagerplus-tests/ui-tests/reports/ui/playwright-report.json"
 
 
 def log(message, context=None):
@@ -60,12 +63,29 @@ class Agent:
         result = run_tests(phase_tests)
 
         log("Analyzing results...", f"{phase_name} | ANALYSIS")
-        analysis = analyze_results(result)
+        json_data = None
+
+        if os.path.exists(PLAYWRIGHT_JSON_PATH):
+            try:
+                with open(PLAYWRIGHT_JSON_PATH, "r", encoding="utf-8") as f:
+                    json_data = json.load(f)
+            except Exception as e:
+                print("[WARNING] Failed to read Playwright JSON:", e)
+
+        analysis = analyze_results(result, json_data)
 
         print("[DEBUG] tests:", analysis.get("tests"))
 
-        for test_name in analysis.get("tests", []):
-            state.record_test_result(test_name, analysis["status"])
+        for test in analysis.get("tests", []):
+            test_name = test["name"]
+            raw_status = test["status"]
+
+            if raw_status == "passed":
+                test_status = "SUCCESS"
+            else:
+                test_status = "FAILURE"
+
+            state.record_test_result(test_name, test_status)
 
         # Flaky tracking
         state.record_phase_result(phase_name, analysis["status"])
