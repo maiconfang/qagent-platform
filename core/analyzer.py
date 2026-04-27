@@ -114,8 +114,11 @@ def extract_tests_from_json(data):
                     duration = result.get("duration", 0)
 
                     # 👇 pegar erro (se existir)
-                    error_obj = result.get("error") or {}
-                    error_message = error_obj.get("message")
+                    error_obj = result.get("error")
+
+                    error_message = None
+                    if isinstance(error_obj, dict):
+                        error_message = error_obj.get("message") or str(error_obj)
 
                     tests.append({
                         "name": test_name,
