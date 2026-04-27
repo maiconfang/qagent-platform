@@ -170,6 +170,48 @@ MAX_ATTEMPTS=2
 ```
 
 ---
+## ⚙️ Runtime Context & Integration
+
+### 📂 External Test Project
+
+This system integrates with an external Playwright test project:
+
+
+../taskmanagerplus-tests/ui-tests
+
+
+The agent reads structured test results from:
+
+
+../taskmanagerplus-tests/ui-tests/reports/ui/playwright-report.json
+
+
+### 🧠 Data Source Strategy
+
+- Playwright JSON report is the **primary source of truth**
+- Stdout parsing is used only as a **fallback mechanism**
+- This ensures:
+  - structured and reliable data
+  - improved test analysis accuracy
+  - better scalability for CI/CD environments
+
+### 🧪 Current Capabilities
+
+The system currently supports:
+
+- Flaky detection (phase-level and test-level)
+- Stability score calculation per test (%)
+- Decision engine (CONTINUE / RETRY / STOP)
+- Persistent execution state
+- HTML reporting with insights and stability metrics
+
+### 🏗️ Architecture Principles
+
+- Multi-project integration (test project + agent system)
+- Evidence-based analysis (no assumptions)
+- Incremental evolution (no breaking changes)
+- Production-oriented design
+---
 
 ## 📈 Roadmap
 

@@ -108,11 +108,20 @@ def extract_tests_from_json(data):
                     if not results:
                         continue
 
-                    status = results[0].get("status")
+                    result = results[0]
+
+                    status = result.get("status")
+                    duration = result.get("duration", 0)
+
+                    # 👇 pegar erro (se existir)
+                    error_obj = result.get("error") or {}
+                    error_message = error_obj.get("message")
 
                     tests.append({
                         "name": test_name,
-                        "status": status
+                        "status": status,
+                        "duration": duration,
+                        "error": error_message
                     })
 
     return tests

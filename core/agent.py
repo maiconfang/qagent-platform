@@ -21,6 +21,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PLAYWRIGHT_JSON_PATH = "../taskmanagerplus-tests/ui-tests/reports/ui/playwright-report.json"
+THRESHOLD_SLOW_MS = int(os.getenv("SLOW_TEST_THRESHOLD", "5000"))
 
 
 def log(message, context=None):
@@ -244,7 +245,16 @@ class Agent:
             if total >= 2:   
                 insights.append(
                     f"STABILITY: {test_name} → {stability:.0f}% stable"
-                )         
+                )
+                
+        # 🔥 NEW: Slow test detection
+        for test in result.final_analysis.get("tests", []):
+            duration = test.get("duration", 0)
+
+            if duration > THRESHOLD_SLOW_MS:
+                insights.append(
+                    f"SLOW TEST DETECTED: {test['name']} took {duration}ms"
+                )                 
 
         report_data["insights"] = insights
 
