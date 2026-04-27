@@ -95,6 +95,36 @@ def extract_test_names(stdout):
     # Remove duplicates while preserving order
     return list(dict.fromkeys(tests))
 
+
+def classify_error(error_message):
+    if not error_message:
+        return None
+
+    msg = error_message.lower()
+
+    if "timeout" in msg:
+        return "UI_TIMEOUT"
+
+    if "locator" in msg or "element not found" in msg:
+        return "LOCATOR_FAILURE"
+
+    if "expect" in msg or "assert" in msg:
+        return "ASSERTION_FAILURE"
+
+    if "403" in msg:
+        return "AUTH_FAILURE"
+
+    if "404" in msg:
+        return "RESOURCE_NOT_FOUND"
+
+    if "400" in msg:
+        return "VALIDATION_ERROR"
+
+    return "UNKNOWN_ERROR"
+
+
+
+
 def extract_tests_from_json(data):
     tests = []
 
@@ -119,12 +149,15 @@ def extract_tests_from_json(data):
                     error_message = None
                     if isinstance(error_obj, dict):
                         error_message = error_obj.get("message") or str(error_obj)
+                    
+                    error_type = classify_error(error_message)
 
                     tests.append({
                         "name": test_name,
                         "status": status,
                         "duration": duration,
-                        "error": error_message
+                        "error": error_message,
+                        "error_type": error_type
                     })
 
     return tests
