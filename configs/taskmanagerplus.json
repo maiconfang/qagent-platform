@@ -6,7 +6,8 @@
       "phases": {
         "HIGH_IMPACT": [
           "tests/province/province.flaky.spec.ts",
-          "tests/province/province.create.api.spec.ts"
+          "tests/province/province.create.api.spec.ts",
+          "tests/province/province.fail.analysis.spec.ts" 
           
         ],
         "EXTENDED": [

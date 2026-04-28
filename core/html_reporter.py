@@ -1,3 +1,14 @@
+def humanize_error(error_type):
+    mapping = {
+        "UI_TIMEOUT": "UI Timeout",
+        "ASSERTION_TIMEOUT": "Assertion Timeout",
+        "LOCATOR_FAILURE": "Locator Failure",
+        "ASSERTION_FAILURE": "Assertion Failure"
+    }
+
+    return mapping.get(error_type, error_type.replace("_", " ").title())
+
+
 def generate_html_report(report_data):
     status = report_data.get("finalStatus", "UNKNOWN")
 
@@ -76,6 +87,19 @@ def generate_html_report(report_data):
 
         except Exception:
             continue
+
+    # 🔥 NEW: Failed tests details
+    failed_tests_html = ""
+
+    for test in report_data.get("tests", []):
+        if test.get("status") in ["failed", "timedOut"]:
+            failed_tests_html += f"""
+            <li>
+                <strong>{test.get("name")}</strong><br>
+                <span class="badge fail">{humanize_error(test.get("error_type"))}</span><br>
+                {test.get("error", "No error message")}
+            </li>
+            """
 
     html = f"""
     <html>
@@ -175,6 +199,13 @@ def generate_html_report(report_data):
                 <h2>🧠 Insights</h2>
                 <ul>
                     {insights_html}
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>❌ Failed Tests Details</h2>
+                <ul>
+                    {failed_tests_html if failed_tests_html else "<li>No failed tests</li>"}
                 </ul>
             </div>
 

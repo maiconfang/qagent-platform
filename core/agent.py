@@ -196,6 +196,7 @@ class Agent:
             "duration": result.duration,
             "phases": result.phases_metrics,
             "history": result.execution_history,
+            "tests": result.final_analysis.get("tests", []) if result.final_analysis else [],
         }
 
         insights = []
@@ -248,7 +249,7 @@ class Agent:
                 )
                 
         # 🔥 NEW: Slow test detection
-        for test in result.final_analysis.get("tests", []):
+        for test in (result.final_analysis or {}).get("tests", []):
             duration = test.get("duration", 0)
 
             if duration > THRESHOLD_SLOW_MS:

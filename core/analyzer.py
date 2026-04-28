@@ -40,14 +40,19 @@ def analyze_results(result, json_data=None):
 def detect_failure_type(stdout, stderr):
     combined = (stdout + stderr).lower()
 
-    if "timeout" in combined:
-        return "TIMEOUT"
+    # 🔥 MOST SPECIFIC FIRST
+
+    if "expect" in combined and "timeout" in combined:
+        return "ASSERTION_TIMEOUT"
 
     if "locator" in combined or "element not found" in combined:
         return "LOCATOR"
 
     if "expect" in combined:
         return "ASSERTION"
+
+    if "timeout" in combined:
+        return "TIMEOUT"
 
     if "net::err" in combined or "failed to fetch" in combined:
         return "API"
@@ -73,6 +78,11 @@ def extract_error_summary(output):
             return line.strip()
 
     return lines[-1] if lines else "No error summary available"
+
+def clean_ansi(text):
+    if not text:
+        return text
+    return re.sub(r'\x1b\[[0-9;]*m', '', text)
 
 
 def extract_test_names(stdout):
@@ -102,14 +112,19 @@ def classify_error(error_message):
 
     msg = error_message.lower()
 
-    if "timeout" in msg:
-        return "UI_TIMEOUT"
+    # 🔥 MOST SPECIFIC FIRST
+
+    if "expect" in msg and "timeout" in msg:
+        return "ASSERTION_TIMEOUT"
 
     if "locator" in msg or "element not found" in msg:
         return "LOCATOR_FAILURE"
 
     if "expect" in msg or "assert" in msg:
         return "ASSERTION_FAILURE"
+
+    if "timeout" in msg:
+        return "UI_TIMEOUT"
 
     if "403" in msg:
         return "AUTH_FAILURE"
@@ -150,6 +165,7 @@ def extract_tests_from_json(data):
                     if isinstance(error_obj, dict):
                         error_message = error_obj.get("message") or str(error_obj)
                     
+                    error_message = clean_ansi(error_message) if error_message else None
                     error_type = classify_error(error_message)
 
                     tests.append({
