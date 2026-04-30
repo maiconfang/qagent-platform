@@ -203,6 +203,14 @@ class Agent:
 
         error_counter = {}
 
+        # 🔥 NEW: Error priority mapping
+        error_priority_map = {
+            "UI_TIMEOUT": "HIGH",
+            "ASSERTION_TIMEOUT": "MEDIUM",
+            "ASSERTION_FAILURE": "MEDIUM",
+            "UNKNOWN": "LOW"
+        }
+
         is_flaky = any(len(set(h)) > 1 for h in state.phase_history.values())
 
         if not is_flaky and result.phases_metrics.get("HIGH_IMPACT", {}).get("status") == "SUCCESS":
@@ -272,7 +280,10 @@ class Agent:
 
         # 🔥 NEW: Top Errors summary
         for error_type, count in error_counter.items():
-            insights.append(f"TOP ERROR: {error_type} → {count}")    
+            priority = error_priority_map.get(error_type, "LOW")
+
+            insights.append(f"TOP ERROR: {error_type} → {count}")
+            insights.append(f"PRIORITY: {error_type} → {priority}")   
 
         # 🔥 NEW: Slow test detection
         for test in (result.final_analysis or {}).get("tests", []):
