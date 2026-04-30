@@ -201,6 +201,8 @@ class Agent:
 
         insights = []
 
+        error_counter = {}
+
         is_flaky = any(len(set(h)) > 1 for h in state.phase_history.values())
 
         if not is_flaky and result.phases_metrics.get("HIGH_IMPACT", {}).get("status") == "SUCCESS":
@@ -247,7 +249,31 @@ class Agent:
                 insights.append(
                     f"STABILITY: {test_name} → {stability:.0f}% stable"
                 )
-                
+
+        # 🔥 NEW: Top Errors classification
+        for test in result.final_analysis.get("tests", []):
+            error_type = test.get("error_type")
+
+            # 👉 fallback in case it does not exist
+            if not error_type:
+                error = test.get("error")
+
+                if not error:
+                    continue
+
+                if "Timeout" in error or "timeout" in error:
+                    error_type = "UI_TIMEOUT"
+                elif "expect" in error:
+                    error_type = "ASSERTION"
+                else:
+                    error_type = "UNKNOWN"
+
+            error_counter[error_type] = error_counter.get(error_type, 0) + 1
+
+        # 🔥 NEW: Top Errors summary
+        for error_type, count in error_counter.items():
+            insights.append(f"TOP ERROR: {error_type} → {count}")    
+
         # 🔥 NEW: Slow test detection
         for test in (result.final_analysis or {}).get("tests", []):
             duration = test.get("duration", 0)
