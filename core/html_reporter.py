@@ -9,6 +9,32 @@ def humanize_error(error_type):
     return mapping.get(error_type, error_type.replace("_", " ").title())
 
 
+def get_root_cause_hint(error_type, error_message):
+    error_message = (error_message or "").lower()
+
+    if error_type == "UI_TIMEOUT":
+        if "locator" in error_message:
+            return "Element not found → locator may be incorrect or page not ready"
+
+        if "timeout" in error_message:
+            return "Test exceeded timeout → possible infinite wait or missing element"
+
+        if "navigation" in error_message:
+            return "Page navigation issue → possible redirect or slow load"
+
+        return "Timeout in UI interaction → possible slow rendering or sync issue"
+
+    if error_type == "ASSERTION_TIMEOUT":
+        if "tohavetext" in error_message or "not found" in error_message:
+            return "Assertion failed → element not found or content not loaded"
+        return "Assertion timeout → expected condition not met in time"
+
+    if error_type == "ASSERTION_FAILURE":
+        return "Assertion mismatch → actual value differs from expected"
+
+    return "Unknown issue → requires deeper investigation"
+
+
 def generate_html_report(report_data):
     status = report_data.get("finalStatus", "UNKNOWN")
 
@@ -130,6 +156,8 @@ def generate_html_report(report_data):
             3: "🥉"
         }.get(rank, f"#{rank}")
 
+        root_cause_hint = get_root_cause_hint(error_type, test.get("error"))
+
         failed_tests_html += f"""
         <li class="test-card {priority_class}">
             <div class="test-header">
@@ -153,6 +181,12 @@ def generate_html_report(report_data):
             <div class="test-error">
                 {test.get("error", "No error message")}
             </div>
+
+            <div class="test-hint">
+                💡 <strong>Possible Root Cause:</strong> {root_cause_hint}
+            </div>
+
+            
         </li>
         """
         rank += 1
@@ -248,6 +282,15 @@ def generate_html_report(report_data):
             .test-error {{
                 font-size: 12px;
                 color: #cbd5f5;
+            }}
+
+            .test-hint {{
+                margin-top: 8px;
+                font-size: 12px;
+                color: #93c5fd;
+                background-color: rgba(59, 130, 246, 0.1);
+                padding: 6px;
+                border-radius: 6px;
             }}
 
             /* Priority border */

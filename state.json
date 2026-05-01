@@ -1,6 +1,6 @@
 {
   "failures": {
-    "HIGH_IMPACT": 26
+    "HIGH_IMPACT": 29
   },
   "phase_history": {
     "HIGH_IMPACT": [
@@ -28,6 +28,9 @@
       "FAILURE",
       "FAILURE",
       "SUCCESS",
+      "FAILURE",
+      "FAILURE",
+      "FAILURE",
       "FAILURE",
       "FAILURE",
       "FAILURE",
@@ -94,6 +97,9 @@
       "SUCCESS",
       "SUCCESS",
       "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
+      "SUCCESS",
       "SUCCESS"
     ],
     "should randomly pass or fail": [
@@ -129,6 +135,9 @@
       "SUCCESS",
       "SUCCESS",
       "FAILURE",
+      "SUCCESS",
+      "SUCCESS",
+      "FAILURE",
       "SUCCESS"
     ],
     "FAIL: locator should break for analyzer validation": [
@@ -147,9 +156,15 @@
       "FAILURE",
       "FAILURE",
       "FAILURE",
+      "FAILURE",
+      "FAILURE",
+      "FAILURE",
       "FAILURE"
     ],
     "FAIL: assertion should break for analyzer validation": [
+      "FAILURE",
+      "FAILURE",
+      "FAILURE",
       "FAILURE",
       "FAILURE",
       "FAILURE",
