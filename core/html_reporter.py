@@ -88,19 +88,75 @@ def generate_html_report(report_data):
         except Exception:
             continue
 
-    # 🔥 NEW: Failed tests details
+    # 🔥 NEW: Failed tests details (enhanced UI)
+
     failed_tests_html = ""
+    rank = 1
+   
+    # 👉 SAME mapping used in agent.py (KEEP CONSISTENT)
+    error_priority_map = {
+        "UI_TIMEOUT": "HIGH",
+        "ASSERTION_TIMEOUT": "MEDIUM",
+        "ASSERTION_FAILURE": "MEDIUM",
+        "UNKNOWN": "LOW"
+    }
 
     for test in report_data.get("tests", []):
-        if test.get("status") in ["failed", "timedOut"]:
-            failed_tests_html += f"""
-            <li>
-                <strong>{test.get("name")}</strong><br>
-                <span class="badge fail">{humanize_error(test.get("error_type"))}</span><br>
-                {test.get("error", "No error message")}
-            </li>
-            """
+        if test.get("status") not in ["failed", "timedOut"]:
+            continue
 
+        error_type = test.get("error_type") or "UNKNOWN"
+        priority = error_priority_map.get(error_type, "LOW")
+        duration = test.get("duration", 0)
+
+        # 🎨 CSS class
+        priority_class = {
+            "HIGH": "priority-high",
+            "MEDIUM": "priority-medium",
+            "LOW": "priority-low"
+        }.get(priority, "priority-low")
+
+        # 🔥 Icons
+        priority_icon = {
+            "HIGH": "🔥",
+            "MEDIUM": "⚠️",
+            "LOW": "ℹ️"
+        }.get(priority, "ℹ️")
+
+        # 🏆 Ranking icon
+        rank_icon = {
+            1: "🥇",
+            2: "🥈",
+            3: "🥉"
+        }.get(rank, f"#{rank}")
+
+        failed_tests_html += f"""
+        <li class="test-card {priority_class}">
+            <div class="test-header">
+                <strong>{rank_icon} {priority_icon} {test.get("name")}</strong>
+            </div>
+
+            <div class="test-meta">
+                <span class="badge {priority_class}">
+                    {priority}
+                </span>
+
+                <span class="badge fail">
+                    {humanize_error(error_type)}
+                </span>
+
+                <span class="duration">
+                    ⏱️ {duration} ms
+                </span>
+            </div>
+
+            <div class="test-error">
+                {test.get("error", "No error message")}
+            </div>
+        </li>
+        """
+        rank += 1
+        
     html = f"""
     <html>
     <head>
@@ -155,6 +211,74 @@ def generate_html_report(report_data):
                 border-radius: 5px;
                 margin-top: 10px;
             }}
+
+
+            /* ===== Test Cards ===== */
+            .test-card {{
+                border: 1px solid #334155;
+                border-radius: 10px;
+                padding: 12px;
+                margin-bottom: 10px;
+                background-color: #020617;
+                transition: transform 0.1s ease;
+            }}
+
+            .test-card:hover {{
+                transform: scale(1.01);
+            }}
+
+            /* Header */
+            .test-header {{
+                font-size: 14px;
+                margin-bottom: 6px;
+            }}
+
+            /* Meta */
+            .test-meta {{
+                margin-bottom: 6px;
+            }}
+
+            .duration {{
+                margin-left: 10px;
+                font-size: 12px;
+                color: #94a3b8;
+            }}
+
+            /* Error */
+            .test-error {{
+                font-size: 12px;
+                color: #cbd5f5;
+            }}
+
+            /* Priority border */
+            .priority-high {{
+                border-left: 5px solid #ef4444;
+            }}
+
+            .priority-medium {{
+                border-left: 5px solid #f59e0b;
+            }}
+
+            .priority-low {{
+                border-left: 5px solid #22c55e;
+            }}
+
+            /* Priority badges */
+            .badge.priority-high {{
+                background: #ef4444;
+                color: white;
+            }}
+
+            .badge.priority-medium {{
+                background: #f59e0b;
+                color: black;
+            }}
+
+            .badge.priority-low {{
+                background: #22c55e;
+                color: black;
+            }}
+
         </style>
     </head>
 
