@@ -107,6 +107,57 @@ def generate_html_report(report_data):
         if not i.startswith("STABILITY:")
     ]
 
+
+    # 🔥 NEW: Error clustering
+    top_errors = [
+        i for i in report_data.get("insights", [])
+        if i.startswith("TOP ERROR:")
+    ]
+
+    error_cluster_html = ""
+
+    # 🔥 Sort by priority
+    priority_order = {
+        "UI_TIMEOUT": 1,
+        "ASSERTION_TIMEOUT": 2,
+        "ASSERTION_FAILURE": 3
+    }
+
+    def extract_type(item):
+        return item.replace("TOP ERROR:", "").split("→")[0].strip()
+
+    top_errors_sorted = sorted(
+        top_errors,
+        key=lambda x: priority_order.get(extract_type(x), 99)
+    )
+
+    for item in top_errors_sorted:
+        try:
+            # Example: "TOP ERROR: UI_TIMEOUT → 1"
+            parts = item.replace("TOP ERROR:", "").split("→")
+            if len(parts) != 2:
+                continue
+
+            error_type = parts[0].strip()
+            count = parts[1].strip()
+
+            human_error = humanize_error(error_type)
+
+            icon = {
+                "UI_TIMEOUT": "🔥",
+                "ASSERTION_TIMEOUT": "⚠️",
+                "ASSERTION_FAILURE": "⚠️"
+            }.get(error_type, "ℹ️")
+
+            error_cluster_html += f"""
+            <li>
+                {icon} <strong>{human_error}</strong> → {count} failures
+            </li>
+            """
+
+        except Exception:
+            continue
+
     insights_html = "".join(f"<li>{i}</li>" for i in filtered_insights)
 
     stability_html = ""
@@ -412,6 +463,13 @@ def generate_html_report(report_data):
                 <h2>🧠 Insights</h2>
                 <ul>
                     {insights_html}
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>🔥 Error Clustering</h2>
+                <ul>
+                    {error_cluster_html if error_cluster_html else "<li>No error clusters</li>"}
                 </ul>
             </div>
 
