@@ -285,6 +285,49 @@ class Agent:
             insights.append(f"TOP ERROR: {error_type} → {count}")
             insights.append(f"PRIORITY: {error_type} → {priority}")   
 
+
+        # 🔥 NEW: Top Failed Tests ranking
+
+        failed_tests = []
+
+        for test in (result.final_analysis or {}).get("tests", []):
+            status = test.get("status")
+
+            if status == "passed":
+                continue
+
+            error_type = test.get("error_type")
+
+            # 👉 fallback in case it does not exist
+            if not error_type:
+                error_type = "UNKNOWN"
+
+            priority = error_priority_map.get(error_type, "LOW")
+
+            failed_tests.append({
+                "name": test.get("name"),
+                "priority": priority,
+                "duration": test.get("duration", 0)
+            })
+
+        # 🔥 sort by priority (HIGH → MEDIUM → LOW)
+        priority_order = {
+            "HIGH": 0,
+            "MEDIUM": 1,
+            "LOW": 2
+        }
+
+        failed_tests_sorted = sorted(
+            failed_tests,
+            key=lambda x: priority_order.get(x["priority"], 3)
+        )
+
+        # 🔥 add to insights
+        for i, test in enumerate(failed_tests_sorted, start=1):
+            insights.append(
+                f"TOP FAILED TEST #{i}: {test['name']} → {test['priority']} ({test['duration']}ms)"
+            )
+
         # 🔥 NEW: Slow test detection
         for test in (result.final_analysis or {}).get("tests", []):
             duration = test.get("duration", 0)
