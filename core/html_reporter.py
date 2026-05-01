@@ -35,6 +35,38 @@ def get_root_cause_hint(error_type, error_message):
     return "Unknown issue → requires deeper investigation"
 
 
+def get_suggested_fix(error_type, error_message):
+    error_message = (error_message or "").lower()
+
+    # 🔥 SIMPLE detection
+    is_playwright = (
+        "locator(" in error_message or
+        "tohavetext" in error_message or
+        "expect(" in error_message or
+        "test timeout" in error_message or
+        "ms exceeded" in error_message
+    )
+
+    if error_type == "UI_TIMEOUT":
+        if is_playwright:
+            if "timeout" in error_message:
+                return "Increase Playwright timeout (page.setDefaultTimeout) or investigate missing waits"
+            return "Use page.waitForSelector() before interaction"
+
+        if "timeout" in error_message:
+            return "Increase global timeout or check for unresolved async operations"
+
+        return "Add explicit wait before interaction"
+
+    if error_type == "ASSERTION_TIMEOUT":
+        if is_playwright:
+            return "Ensure element is visible before expect() or increase timeout"
+
+        return "Ensure element is ready before assertion"
+
+    return "Investigate logs and validate test assumptions"
+
+
 def generate_html_report(report_data):
     status = report_data.get("finalStatus", "UNKNOWN")
 
@@ -157,6 +189,7 @@ def generate_html_report(report_data):
         }.get(rank, f"#{rank}")
 
         root_cause_hint = get_root_cause_hint(error_type, test.get("error"))
+        suggested_fix = get_suggested_fix(error_type, test.get("error"))
 
         failed_tests_html += f"""
         <li class="test-card {priority_class}">
@@ -184,6 +217,10 @@ def generate_html_report(report_data):
 
             <div class="test-hint">
                 💡 <strong>Possible Root Cause:</strong> {root_cause_hint}
+            </div>
+
+            <div class="test-fix">
+                🛠 <strong>Suggested Fix:</strong> {suggested_fix}
             </div>
 
             
@@ -289,6 +326,15 @@ def generate_html_report(report_data):
                 font-size: 12px;
                 color: #93c5fd;
                 background-color: rgba(59, 130, 246, 0.1);
+                padding: 6px;
+                border-radius: 6px;
+            }}
+
+            .test-fix {{
+                margin-top: 6px;
+                font-size: 12px;
+                color: #86efac;
+                background-color: rgba(34, 197, 94, 0.1);
                 padding: 6px;
                 border-radius: 6px;
             }}
