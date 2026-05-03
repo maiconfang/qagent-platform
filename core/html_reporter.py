@@ -282,6 +282,9 @@ def generate_html_report(report_data):
         root_cause_hint = get_root_cause_hint(error_type, test.get("error"))
         suggested_fix = get_suggested_fix(error_type, test.get("error"))
 
+        # 🔗 Correlation
+        correlation = f"{humanize_error(error_type)} → {root_cause_hint.split('→')[0]} → {suggested_fix.split('→')[0]}"            
+
         failed_tests_html += f"""
         <li class="test-card {priority_class}">
             <div class="test-header">
@@ -312,6 +315,10 @@ def generate_html_report(report_data):
 
             <div class="test-fix">
                 🛠 <strong>Suggested Fix:</strong> {suggested_fix}
+            </div>
+
+            <div class="test-correlation">
+                🔗 <strong>Correlation:</strong> {correlation}
             </div>
 
             
@@ -426,6 +433,15 @@ def generate_html_report(report_data):
                 font-size: 12px;
                 color: #86efac;
                 background-color: rgba(34, 197, 94, 0.1);
+                padding: 6px;
+                border-radius: 6px;
+            }}
+
+            .test-correlation {{
+                margin-top: 6px;
+                font-size: 12px;
+                color: #facc15;
+                background-color: rgba(250, 204, 21, 0.1);
                 padding: 6px;
                 border-radius: 6px;
             }}
