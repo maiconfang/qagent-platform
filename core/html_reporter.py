@@ -197,8 +197,48 @@ def generate_html_report(report_data):
         except Exception:
             continue
 
-    # 🔥 NEW: Failed tests details (enhanced UI)
+    # 🔥 NEW: Trend analysis
+    trend_html = ""
 
+    for item in stability_items:
+        try:
+            parts = item.split("→")
+            if len(parts) != 2:
+                continue
+
+            name_part, value_part = parts
+
+            test_name = name_part.replace("STABILITY:", "").strip()
+            stability_value = value_part.replace("stable", "").strip()
+
+            value_num = int(stability_value.replace("%", ""))
+
+            # 🎯 Trend classification
+            if value_num >= 85:
+                trend = "Stable"
+                icon = "✅"
+            elif value_num >= 70:
+                trend = "Unstable"
+                icon = "⚠️"
+            elif value_num >= 50:
+                trend = "Highly unstable"
+                icon = "⚠️"    
+            else:
+                trend = "Consistently failing"
+                icon = "❌"
+
+            trend_html += f"""
+            <li>
+                {icon} <strong>{test_name}</strong> → {trend} ({value_num}%)
+            </li>
+            """
+
+        except Exception:
+            continue    
+
+
+
+    # 🔥 NEW: Failed tests details (enhanced UI)
     failed_tests_html = ""
     rank = 1
    
@@ -456,6 +496,13 @@ def generate_html_report(report_data):
                 <h2>📊 Stability</h2>
                 <ul>
                     {stability_html if stability_html else "<li>No stability data</li>"}
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>📈 Trends</h2>
+                <ul>
+                    {trend_html if trend_html else "<li>No trend data</li>"}
                 </ul>
             </div>
 
