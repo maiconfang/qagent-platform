@@ -102,6 +102,68 @@ def generate_html_report(report_data):
         if i.startswith("STABILITY:")
     ]
 
+    # ===== KPI CALCULATION =====
+    tests = report_data.get("tests", [])
+
+    total_tests = len(tests)
+    failed_tests = len([t for t in tests if t.get("status") in ["failed", "timedOut"]])
+    passed_tests = len([t for t in tests if t.get("status") == "passed"])
+
+    success_rate = int((passed_tests / total_tests) * 100) if total_tests > 0 else 0
+
+    # Dominant error
+    error_counts = {}
+    for t in tests:
+        et = t.get("error_type")
+        if not et:
+            continue
+        error_counts[et] = error_counts.get(et, 0) + 1
+
+    dominant_error = "None"
+    if error_counts:
+        # 🔥 Priority-based dominant error (better than count-only)
+        priority_order = {
+            "UI_TIMEOUT": 1,
+            "ASSERTION_TIMEOUT": 2,
+            "ASSERTION_FAILURE": 3
+        }
+
+        dominant_error = sorted(
+            error_counts.keys(),
+            key=lambda x: priority_order.get(x, 99)
+        )[0]
+
+        dominant_error = humanize_error(dominant_error)
+
+    # Average stability
+    stability_values = []
+    for item in stability_items:
+        try:
+            value = item.split("→")[1]
+            value = int(value.replace("stable", "").replace("%", "").strip())
+            stability_values.append(value)
+        except:
+            continue
+
+    avg_stability = int(sum(stability_values) / len(stability_values)) if stability_values else 0
+
+    # ===== EXECUTIVE SUMMARY =====
+    if failed_tests == 0:
+        conclusion = "System is stable with no failing tests."
+        recommendation = "No immediate action required."
+
+    elif dominant_error == "UI Timeout":
+        conclusion = "System shows instability due to UI timeout failures."
+        recommendation = "Review locator strategy and add proper waits (waitForSelector / timeout adjustments)."
+
+    elif dominant_error == "Assertion Timeout":
+        conclusion = "System shows instability due to assertion timeouts."
+        recommendation = "Ensure elements are visible and ready before assertions."
+
+    else:
+        conclusion = "System shows instability due to multiple failure types."
+        recommendation = "Investigate failing tests and validate test assumptions."
+
     filtered_insights = [
         i for i in report_data.get("insights", [])
         if not i.startswith("STABILITY:")
@@ -283,7 +345,15 @@ def generate_html_report(report_data):
         suggested_fix = get_suggested_fix(error_type, test.get("error"))
 
         # 🔗 Correlation
-        correlation = f"{humanize_error(error_type)} → {root_cause_hint.split('→')[0]} → {suggested_fix.split('→')[0]}"            
+        # correlation = f"{humanize_error(error_type)} → {root_cause_hint.split('→')[0].strip()} → {suggested_fix.split(' or ')[0].split(' / ')[0].strip()}"
+
+        clean_root = root_cause_hint.split('→')[0].strip()
+
+        clean_fix = suggested_fix.split(' or ')[0]
+        clean_fix = clean_fix.split(' / ')[0]
+        clean_fix = clean_fix.strip()
+
+        correlation = f"{humanize_error(error_type)} → {clean_root} → {clean_fix}"            
 
         failed_tests_html += f"""
         <li class="test-card {priority_class}">
@@ -493,6 +563,21 @@ def generate_html_report(report_data):
 
                 <p><strong>Command:</strong> {report_data.get("command")}</p>
                 <p><strong>Duration:</strong> {report_data.get("duration")}s</p>
+            </div>
+
+            <div class="card">
+                <h2>📊 Execution Summary</h2>
+
+                <p><strong>Total Tests:</strong> {total_tests}</p>
+                <p><strong>Failures:</strong> {failed_tests}</p>
+                <p><strong>Success Rate:</strong> {success_rate}%</p>
+                <p><strong>Dominant Error:</strong> {dominant_error}</p>
+                <p><strong>Average Stability:</strong> {avg_stability}%</p>
+
+                <hr style="margin:10px 0; border-color:#334155;">
+
+                <p><strong>🧠 Conclusion:</strong><br>{conclusion}</p>
+                <p><strong>🛠 Recommendation:</strong><br>{recommendation}</p>
             </div>
 
             <div class="card">
