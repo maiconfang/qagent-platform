@@ -1,5 +1,23 @@
 from core.flaky_detector import is_flaky
 
+"""
+Decision Engine - QAgent Platform
+
+This module represents the decision-making brain of the platform.
+
+It simulates how a QA Engineer evaluates failures and decides:
+- Continue execution
+- Retry unstable tests
+- Stop critical failures
+
+The engine uses:
+- Failure classification
+- Flaky detection
+- Stability analysis
+- Priority-based rules
+
+to drive intelligent QA execution flow.
+"""
 
 def decide_next_step(analysis, phase_name=None, failure_history=None, state=None):
     status = analysis.get("status")

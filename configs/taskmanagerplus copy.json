@@ -2,23 +2,58 @@
   "project": "taskmanagerplus",
 
   "domains": {
+
     "provinces": {
       "phases": {
+
         "HIGH_IMPACT": [
-          "tests/province/province.form.validation.spec.ts",
+          "tests/province/province.flaky.spec.ts",
           "tests/province/province.create.api.spec.ts",
-          "tests/province/province.edit.api.spec.ts",
+          "tests/province/province.fail.analysis.spec.ts",
           "tests/province/province.fail.locator.spec.ts"
         ],
+
         "EXTENDED": [
           "tests/province/province.menu.navigation.spec.ts",
-          "tests/province/province.search.empty-state.spec.ts"
+          "tests/province/province.search.empty-state.spec.ts",
+          "tests/province/province.navigation.spec.ts",
+          "tests/province/province.form.validation.spec.ts"
         ],
+
         "FULL": [
           "tests/province/province.delete.api.spec.ts",
-          "tests/province/province-ui-legacy.spec.ts"
+          "tests/province/province.edit.api.spec.ts",
+          "tests/province/province.ui-legacy.spec.ts"
         ]
       }
+    },
+
+    "tasks": {
+      "phases": {
+
+        "HIGH_IMPACT": [
+          "tests/task/task.navigation.spec.ts"
+        ],
+
+        "EXTENDED": [
+          "tests/task/task.consult.filters.spec.ts"
+        ],
+
+        "FULL": []
+      }
+    },
+
+    "auth": {
+      "phases": {
+
+        "HIGH_IMPACT": [
+          "tests/login.spec.ts"
+        ],
+
+        "EXTENDED": [],
+        "FULL": []
+      }
     }
+
   }
 }

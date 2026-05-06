@@ -1,5 +1,17 @@
 import re
 
+"""
+Result Analyzer - QAgent Platform
+
+This module simulates how a QA Engineer investigates failures.
+
+Responsibilities:
+- Analyze test execution results
+- Detect and classify failures
+- Extract test evidence
+- Identify error patterns
+- Generate structured QA insights
+"""
 
 def analyze_results(result, json_data=None):
     """

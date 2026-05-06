@@ -1,3 +1,18 @@
+"""
+Failure Classifier - QAgent Platform
+
+This module simulates how a QA Engineer interprets failures.
+
+It analyzes raw execution output and classifies issues such as:
+- Timeouts
+- Locator failures
+- API problems
+- Unknown errors
+
+The generated classifications are used by the
+Decision Engine to drive intelligent execution flow.
+"""
+
 def classify_error(result):
     """
     Classify error based on stderr/stdout patterns.

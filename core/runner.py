@@ -1,6 +1,21 @@
 import subprocess
 import os
 
+"""
+Test Runner - QAgent Platform
+
+This module simulates how a QA Engineer triggers
+and monitors automated test execution.
+
+It is responsible for:
+- Running Playwright tests
+- Capturing execution output
+- Detecting execution failures
+- Returning structured execution data
+
+The runner is the entry point of the intelligent
+QA execution pipeline.
+"""
 
 def run_tests(test_list=None):
     test_project_path = os.getenv("TEST_PROJECT_PATH", ".")

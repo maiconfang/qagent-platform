@@ -1,5 +1,6 @@
 # core/agent.py
 
+
 import sys
 import os
 import json
@@ -19,6 +20,20 @@ from core.html_reporter import generate_html_report
 
 from dotenv import load_dotenv
 load_dotenv()
+
+
+"""
+QAgent Platform - Agentic QA Engine
+
+The Agent is the brain of the platform.
+
+It simulates how a real QA Engineer thinks by:
+- Executing tests
+- Analyzing failures
+- Classifying issues
+- Deciding next actions
+- Generating reports
+"""
 
 PLAYWRIGHT_JSON_PATH = "../taskmanagerplus-tests/ui-tests/reports/ui/playwright-report.json"
 THRESHOLD_SLOW_MS = int(os.getenv("SLOW_TEST_THRESHOLD", "5000"))

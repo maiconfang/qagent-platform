@@ -1,3 +1,22 @@
+
+"""
+HTML Reporter - QAgent Platform
+
+This module simulates how a QA Engineer communicates
+test execution results to a team.
+
+It transforms raw automation data into:
+- Visual reports
+- Failure insights
+- Stability analysis
+- Root cause hints
+- Suggested fixes
+- Error correlations
+
+The goal is to make automated test results easier
+to understand, investigate and act upon.
+"""
+
 def humanize_error(error_type):
     mapping = {
         "UI_TIMEOUT": "UI Timeout",
